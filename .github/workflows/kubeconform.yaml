@@ -1,3 +1,4 @@
+---
 name: kubeconform
 on:
   - pull_request
