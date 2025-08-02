@@ -11,4 +11,4 @@ jobs:
       - uses: docker://ghcr.io/yannh/kubeconform:latest
         with:
           entrypoint: '/kubeconform'
-          args: "-summary -output json ./"
+          args: "-summary -schema-location .github/schemas/argocd.yaml -recursive ./infrastructure/"
