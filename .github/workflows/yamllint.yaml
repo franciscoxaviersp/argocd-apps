@@ -1,0 +1,25 @@
+---
+name: 'Yamllint GitHub Actions'
+on:
+  - pull_request
+jobs:
+  yamllint:
+    name: Run yamllint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Run yamllint
+        run: |
+          yamllint -c .yamllint.yml .
+        continue-on-error: true
