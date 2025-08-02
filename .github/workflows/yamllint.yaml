@@ -15,4 +15,4 @@ jobs:
           yamllint_strict: false
           yamllint_config_datapath: |
             ignore:
-              .github/
+              .github/**
