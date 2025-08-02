@@ -4,15 +4,21 @@ on:
   - pull_request
 jobs:
   yamllint:
-    name: 'Yamllint'
+    name: Run yamllint
     runs-on: ubuntu-latest
+
     steps:
-      - name: 'Checkout'
-        uses: actions/checkout@master
-      - name: 'Yamllint'
-        uses: karancode/yamllint-github-action@master
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          yamllint_strict: false
-          yamllint_config_datapath: |
-            ignore:
-              .github/**
+          python-version: '3.x'
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Run yamllint
+        run: |
+          yamllint -c .yamllint.yml .
