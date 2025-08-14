@@ -62,6 +62,7 @@ jobs:
         run: |
           IFS=' ' read -r -a clusters <<< "${{ steps.detect.outputs.clusters }}"
           WORKFLOW_ID="${{ steps.workflow-id.outputs.workflow_id }}"
+          BRANCH="${GITHUB_HEAD_REF:-main}"
           for cluster in "${clusters[@]}"; do
             echo "Dispatching deploy for cluster: $cluster"
             RESPONSE=$(curl -L \
@@ -69,10 +70,11 @@ jobs:
               -H "Accept: application/vnd.github+json" \
               -H "Authorization: Bearer ${{ secrets.TRIGGER_WORKFLOW_TOKEN }}" \
               https://api.github.com/repos/${{ github.repository }}/actions/workflows/$WORKFLOW_ID/dispatches \
-              -d "{\"ref\":\"${{ github.ref }}\",\"inputs\":{\"cluster\":\"$cluster\"}}" \
+              -d "{\"ref\":\"$BRANCH\",\"inputs\":{\"cluster\":\"$cluster\"}}" \
               -w "%{http_code}" -o /dev/null)
-            if [ "$RESPONSE" -ne 200 ]; then
+            if [ "$RESPONSE" -ne 204 ]; then
               echo "Error: Failed to dispatch workflow for cluster: $cluster (HTTP status: $RESPONSE)"
               exit 1
             fi
           done
+          
