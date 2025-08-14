@@ -58,5 +58,10 @@ jobs:
               -H "Accept: application/vnd.github+json" \
               -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
               https://api.github.com/repos/${{ github.repository }}/actions/workflows/cluster-deploy.yaml/dispatches \
-              -d "{\"ref\":\"${{ github.ref }}\",\"inputs\":{\"cluster\":\"$cluster\"}}"
+              -d "{\"ref\":\"${{ github.ref }}\",\"inputs\":{\"cluster\":\"$cluster\"}}" \
+              -w "%{http_code}" -o /dev/null)
+            if [ "$RESPONSE" -ne 200 ]; then
+              echo "Error: Failed to dispatch workflow for cluster: $cluster (HTTP status: $RESPONSE)"
+              exit 1
+            fi
           done
