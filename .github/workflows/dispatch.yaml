@@ -79,4 +79,15 @@ jobs:
               exit 1
             fi
           done
+
+      - name: Dispatch workflows per cluster
+        if: steps.detect.outputs.clusters != ''
+        run: |
+          IFS=' ' read -r -a clusters <<< "${{ steps.detect.outputs.clusters }}"
+          for cluster in "${clusters[@]}"; do
+            echo "Dispatching deploy for cluster: $cluster"
+            gh workflow run cluster-deploy.yaml \
+              --ref ${{ github.ref }} \
+              --field cluster="$cluster"
+          done
           
