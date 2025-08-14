@@ -87,10 +87,11 @@ jobs:
         run: |
           IFS=' ' read -r -a clusters <<< "${{ steps.detect.outputs.clusters }}"
           WORKFLOW_ID="${{ steps.workflow-id.outputs.workflow_id }}"
+          BRANCH="${GITHUB_HEAD_REF:-main}"
           for cluster in "${clusters[@]}"; do
             echo "Dispatching deploy for cluster: $cluster"
             gh workflow run $WORKFLOW_ID \
-              --ref ${{ github.ref }} \
+              --ref $BRANCH \
               --field cluster="$cluster"
           done
           
