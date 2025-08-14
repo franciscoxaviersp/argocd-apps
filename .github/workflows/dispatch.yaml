@@ -40,6 +40,12 @@ jobs:
         id: echo-url
         run: |
           echo https://api.github.com/repos/${{ github.repository }}/actions/workflows/deploy-cluster.yaml/dispatches
+      - name: echo ref
+        id: echo-ref
+        run: |
+          echo ${{ github.ref }}
+      - name: List workflows
+        run: ls -l .github/workflows/
 
       - name: Dispatch workflows per cluster
         if: steps.detect.outputs.clusters != ''
@@ -51,6 +57,6 @@ jobs:
               -X POST \
               -H "Accept: application/vnd.github+json" \
               -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-              https://api.github.com/repos/${{ github.repository }}/actions/workflows/deploy-cluster.yaml/dispatches \
+              https://api.github.com/repos/${{ github.repository }}/actions/workflows/cluster-deploy.yaml/dispatches \
               -d "{\"ref\":\"${{ github.ref }}\",\"inputs\":{\"cluster\":\"$cluster\"}}"
           done
