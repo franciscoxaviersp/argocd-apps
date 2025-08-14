@@ -22,7 +22,7 @@ jobs:
       - name: Install OpenVPN client
         run: sudo apt-get update && sudo apt-get install -y openvpn
 
-        - name: Prepare VPN config & certs
+      - name: Prepare VPN config & certs
         env:
           CLUSTER: ${{ github.event.inputs.cluster }}
         run: |
