@@ -1,0 +1,44 @@
+name: Dispatch Cluster Deployments
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  detect-and-dispatch:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Detect changed clusters
+        id: detect
+        run: |
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          CLUSTERS=""
+          for FILE in $CHANGED_FILES; do
+            if [[ "$FILE" == clusters/*/*.yaml ]]; then
+              CLUSTER_NAME=$(echo "$FILE" | cut -d'/' -f2)
+              CLUSTERS="$CLUSTERS $CLUSTER_NAME"
+            fi
+          done
+
+          UNIQUE_CLUSTERS=$(echo $CLUSTERS | tr ' ' '\n' | sort -u | tr '\n' ' ')
+          echo "clusters=$UNIQUE_CLUSTERS" >> $GITHUB_OUTPUT
+
+      - name: Dispatch workflows per cluster
+        if: steps.detect.outputs.clusters != ''
+        run: |
+          IFS=' ' read -r -a clusters <<< "${{ steps.detect.outputs.clusters }}"
+          for cluster in "${clusters[@]}"; do
+            echo "Dispatching deploy for cluster: $cluster"
+            curl -X POST \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              https://api.github.com/repos/${{ github.repository }}/actions/workflows/deploy-cluster.yaml/dispatches \
+              -d "{\"ref\":\"${{ github.ref }}\",\"inputs\":{\"cluster\":\"$cluster\"}}"
+          done

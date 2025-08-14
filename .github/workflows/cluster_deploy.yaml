@@ -1,0 +1,57 @@
+name: Deploy to Cluster
+
+on:
+  workflow_dispatch:
+    inputs:
+      cluster:
+        description: 'Cluster name to deploy to'
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.30.0'
+
+      - name: Install OpenVPN client
+        run: sudo apt-get update && sudo apt-get install -y openvpn
+
+        - name: Prepare VPN config & certs
+        env:
+          CLUSTER: ${{ github.event.inputs.cluster }}
+        run: |
+          mkdir -p vpn
+          echo "${{ secrets['OPENVPN_CONF_' + env.CLUSTER^^] }}" > vpn/client.ovpn
+          echo "${{ secrets['OPENVPN_CA_' + env.CLUSTER^^] }}" > vpn/ca.crt
+          echo "${{ secrets['OPENVPN_CERT_' + env.CLUSTER^^] }}" > vpn/client.crt
+          echo "${{ secrets['OPENVPN_KEY_' + env.CLUSTER^^] }}" > vpn/client.key
+          echo "${{ secrets['OPENVPN_TLS_' + env.CLUSTER^^] }}" > vpn/tls.key
+          echo "${{ secrets['OPENVPN_KEY_' + env.CLUSTER^^] }}" > vpn/credentials.txt
+
+      - name: Connect VPN
+        run: |
+          sudo openvpn --config ./vpn/client.ovpn --daemon
+          sleep 15
+
+      - name: Setup kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets['KUBECONFIG_' + env.CLUSTER^^] }}" > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+      - name: Apply changed apps manifests
+        run: |
+          CLUSTER=${{ github.event.inputs.cluster }}
+          git fetch origin ${{ github.ref }}
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.event.base_ref }} ${{ github.sha }} -- clusters/${CLUSTER}/)
+          echo "Applying changed files to cluster $CLUSTER:"
+          echo "$CHANGED_FILES"
+          for FILE in $CHANGED_FILES; do
+            kubectl apply -f "$FILE"
+          done
