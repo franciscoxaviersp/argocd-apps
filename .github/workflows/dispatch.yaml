@@ -39,7 +39,7 @@ jobs:
       - name: echo url
         id: echo-url
         run: |
-          echo https://api.github.com/repos/${{ github.repository }}/actions/workflows/deploy-cluster.yaml/dispatches
+          echo https://api.github.com/repos/${{ github.repository }}/actions/workflows/cluster-deploy.yaml/dispatches
       - name: echo ref
         id: echo-ref
         run: |
