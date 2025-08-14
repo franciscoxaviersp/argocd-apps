@@ -53,7 +53,7 @@ jobs:
           IFS=' ' read -r -a clusters <<< "${{ steps.detect.outputs.clusters }}"
           for cluster in "${clusters[@]}"; do
             echo "Dispatching deploy for cluster: $cluster"
-            curl -L \
+            RESPONSE=$(curl -L \
               -X POST \
               -H "Accept: application/vnd.github+json" \
               -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
