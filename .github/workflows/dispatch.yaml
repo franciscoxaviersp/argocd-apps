@@ -63,6 +63,8 @@ jobs:
           IFS=' ' read -r -a clusters <<< "${{ steps.detect.outputs.clusters }}"
           WORKFLOW_ID="${{ steps.workflow-id.outputs.workflow_id }}"
           BRANCH="${GITHUB_HEAD_REF:-main}"
+          echo $WORKFLOW_ID
+          echo $BRANCH
           for cluster in "${clusters[@]}"; do
             echo "Dispatching deploy for cluster: $cluster"
             RESPONSE=$(curl -L \
