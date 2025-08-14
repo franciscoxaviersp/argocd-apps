@@ -85,8 +85,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           BRANCH="${GITHUB_HEAD_REF:-main}"
-          gh workflow list \
-            --ref $BRANCH
+          gh workflow list
 
       - name: Dispatch workflows per cluster
         if: steps.detect.outputs.clusters != ''
