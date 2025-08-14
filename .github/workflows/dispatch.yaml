@@ -82,6 +82,8 @@ jobs:
 
       - name: Dispatch workflows per cluster
         if: steps.detect.outputs.clusters != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           IFS=' ' read -r -a clusters <<< "${{ steps.detect.outputs.clusters }}"
           for cluster in "${clusters[@]}"; do
