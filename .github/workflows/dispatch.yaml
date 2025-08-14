@@ -86,9 +86,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           IFS=' ' read -r -a clusters <<< "${{ steps.detect.outputs.clusters }}"
+          WORKFLOW_ID="${{ steps.workflow-id.outputs.workflow_id }}"
           for cluster in "${clusters[@]}"; do
             echo "Dispatching deploy for cluster: $cluster"
-            gh workflow run cluster-deploy.yaml \
+            gh workflow run $WORKFLOW_ID \
               --ref ${{ github.ref }} \
               --field cluster="$cluster"
           done
