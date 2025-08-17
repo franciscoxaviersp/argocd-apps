@@ -25,9 +25,11 @@ jobs:
       - name: Prepare VPN config & certs
         env:
           CLUSTER: ${{ github.event.inputs.cluster }}
+          OPENVPN_CONF: ${{ fromJSON('{"homelab": "${{ secrets.OPENVPN_CONF_HOMELAB }}"}')[env.CLUSTER] }}
         run: |
           mkdir -p vpn
-          echo "${{ secrets['OPENVPN_CONF_' + env.CLUSTER^^] }}" > vpn/client.ovpn
+          echo "$OPENVPN_CONF" > vpn/client.ovpn
+          cat > vpn/client.ovpn
           echo "${{ secrets['OPENVPN_CA_' + env.CLUSTER^^] }}" > vpn/ca.crt
           echo "${{ secrets['OPENVPN_CERT_' + env.CLUSTER^^] }}" > vpn/client.crt
           echo "${{ secrets['OPENVPN_KEY_' + env.CLUSTER^^] }}" > vpn/client.key
