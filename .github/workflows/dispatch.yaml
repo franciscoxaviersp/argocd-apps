@@ -51,14 +51,10 @@ jobs:
         id: workflow-id
         run: |
           WORKFLOW_NAME=".github/workflows/cluster_deploy.yaml"
-          CURL_OUTPUT=$(curl -s -H "Authorization: Bearer ${{ secrets.TRIGGER_WORKFLOW_TOKEN }}" \
-            -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/${{ github.repository }}/actions/workflows)
-          echo "CURL_OUTPUT: $CURL_OUTPUT"
           ID=$(curl -s -H "Authorization: Bearer ${{ secrets.TRIGGER_WORKFLOW_TOKEN }}" \
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/${{ github.repository }}/actions/workflows \
-            | jq ".workflows[] | select(.name==\"$WORKFLOW_NAME\") | .id")
+            | jq ".workflows[] | select(.path==\"$WORKFLOW_NAME\") | .id")
           echo "workflow_id=$ID" >> $GITHUB_OUTPUT
 
       # - name: Dispatch workflows per cluster
@@ -98,11 +94,10 @@ jobs:
         run: |
           IFS=' ' read -r -a clusters <<< "${{ steps.detect.outputs.clusters }}"
           WORKFLOW_ID="${{ steps.workflow-id.outputs.workflow_id }}"
-          WORKFLOW_NAME="cluster-deploy.yaml"
           BRANCH="${GITHUB_HEAD_REF:-main}"
           for cluster in "${clusters[@]}"; do
             echo "Dispatching deploy for cluster: $cluster"
-            gh workflow run $WORKFLOW_NAME \
+            gh workflow run $WORKFLOW_ID \
               --ref $BRANCH \
               -F cluster="$cluster"
           done
