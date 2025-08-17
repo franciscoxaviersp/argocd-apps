@@ -42,6 +42,15 @@ jobs:
               ;;
           esac
           cat vpn/client.ovpn
+      
+      - name: Verify CA certificate
+        run: |
+          echo "Checking CA certificate details..."
+          openssl x509 -in vpn/ca.crt -noout -text
+          
+          # Optional: if you have server cert to verify against CA
+          # openssl verify -CAfile vpn/ca.crt vpn/server.crt
+        shell: bash
 
       - name: Connect VPN
         run: |
