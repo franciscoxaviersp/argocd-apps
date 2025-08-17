@@ -76,7 +76,7 @@ jobs:
       - name: Test kubectl connection
         run: |
           cat $HOME/.kube/config
-          cat ${{ github.event.pull_request.base.sha }}
+          cat ${{ github.event.pull_request.base.ref }}
           kubectl get pods -A
 
       - name: Connect VPN
