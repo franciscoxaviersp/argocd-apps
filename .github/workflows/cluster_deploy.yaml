@@ -53,6 +53,10 @@ jobs:
           # Optional: if you have server cert to verify against CA
           # openssl verify -CAfile vpn/ca.crt vpn/server.crt
         shell: bash
+      
+      - name: Test UDP connectivity to VPN
+        run: |
+          nc -vuz vpn.be-an-explorer.com 36047
 
       - name: Connect VPN
         run: |
