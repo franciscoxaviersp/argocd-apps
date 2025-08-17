@@ -48,7 +48,7 @@ jobs:
       - uses: GrantBirki/git-diff-action@v2.8.1
         id: git-diff-action
         with:
-          base_path: ${{ github.event.pull_request.base.sha }}
+          base_branch: ${{ github.event.pull_request.base.sha }}
           json_diff_file_output: diff.json
           file_output_only: "true"
           search_path: ./clusters/${CLUSTER}/*.yaml
