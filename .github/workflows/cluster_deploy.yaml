@@ -51,6 +51,7 @@ jobs:
           base_path: ${{ github.event.pull_request.base.sha }}
           json_diff_file_output: diff.json
           file_output_only: "true"
+          search_path: ./clusters/${CLUSTER}/*.yaml
       - name: print json diff
         env:
           DIFF: ${{ steps.git-diff-action.outputs.json-diff-path }}
