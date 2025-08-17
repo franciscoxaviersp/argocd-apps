@@ -43,6 +43,9 @@ jobs:
           esac
           cat vpn/client.ovpn
 
+      - name: Display VPN config
+        run: cat vpn/client.ovpn
+
       - name: Connect VPN
         run: |
           sudo openvpn --config ./vpn/client.ovpn --daemon
