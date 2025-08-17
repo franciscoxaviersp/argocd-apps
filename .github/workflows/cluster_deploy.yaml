@@ -23,7 +23,7 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.inputs.head_ref }}
       - name: Fetch base branch
-        run: git fetch origin ${{ github.event.inputs.base_branch }}
+        run: git fetch origin ${{ github.event.inputs.base_branch }}:${{ github.event.inputs.base_branch }}
 
       - name: Setup kubectl
         uses: azure/setup-kubectl@v3
