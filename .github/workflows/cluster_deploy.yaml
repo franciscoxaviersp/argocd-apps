@@ -51,7 +51,15 @@ jobs:
       - name: Setup kubeconfig
         run: |
           mkdir -p $HOME/.kube
-          echo "${{ secrets['KUBECONFIG_' + env.CLUSTER^^] }}" > $HOME/.kube/config
+          case "$CLUSTER" in
+            homelab)
+              echo "${{ secrets.KUBECONFIG_HOMELAB }}" > $HOME/.kube/config
+              ;;
+            *)
+              echo "Unknown cluster $CLUSTER"
+              exit 1
+              ;;
+          esac
           chmod 600 $HOME/.kube/config
 
       - name: Apply changed apps manifests
