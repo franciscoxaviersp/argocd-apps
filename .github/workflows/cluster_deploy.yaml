@@ -6,6 +6,9 @@ on:
       cluster:
         description: 'Cluster name to deploy to'
         required: true
+      base_branch:
+        description: 'Base branch for the deployment'
+        required: true
 
 jobs:
   deploy:
@@ -48,7 +51,7 @@ jobs:
       - uses: GrantBirki/git-diff-action@v2.8.1
         id: git-diff-action
         with:
-          base_branch: ${{ github.event.pull_request.base.sha }}
+          base_branch: ${{ github.event.inputs.base_branch }}
           json_diff_file_output: diff.json
           file_output_only: "true"
           search_path: ./clusters/${CLUSTER}/*.yaml
@@ -76,7 +79,7 @@ jobs:
       - name: Test kubectl connection
         run: |
           cat $HOME/.kube/config
-          cat ${{ github.event.pull_request.base.ref }}
+          echo ${{ github.event.pull_request.base.ref }}
           kubectl get pods -A
 
       - name: Connect VPN

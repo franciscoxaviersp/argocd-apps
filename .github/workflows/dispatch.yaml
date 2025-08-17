@@ -99,6 +99,7 @@ jobs:
             echo "Dispatching deploy for cluster: $cluster"
             gh workflow run $WORKFLOW_ID \
               --ref $BRANCH \
-              -F cluster="$cluster"
+              -F cluster="$cluster" \
+              -F base_branch="${{ github.event.pull_request.base.ref }}"
           done
           
