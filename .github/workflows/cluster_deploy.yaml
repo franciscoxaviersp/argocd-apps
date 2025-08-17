@@ -60,7 +60,7 @@ jobs:
 
       - name: Connect VPN
         run: |
-          sudo openvpn --config ./vpn/client.ovpn
+          sudo openvpn --config ./vpn/client.ovpn --verb 5
           sleep 15
           echo "VPN connected successfully."
 
