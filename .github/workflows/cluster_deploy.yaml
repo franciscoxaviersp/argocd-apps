@@ -44,12 +44,15 @@ jobs:
           cat vpn/client.ovpn
 
       - name: Display VPN config
-        run: cat vpn/client.ovpn
+        run: |
+          echo "VPN configuration for cluster $CLUSTER:"
+          cat vpn/client.ovpn
 
       - name: Connect VPN
         run: |
           sudo openvpn --config ./vpn/client.ovpn --daemon
           sleep 15
+          echo "VPN connected successfully."
 
       - name: Setup kubeconfig
         run: |
