@@ -64,6 +64,8 @@ jobs:
           chmod 600 $HOME/.kube/config
 
       - name: Apply changed apps manifests
+        env:
+          CLUSTER: ${{ github.event.inputs.cluster }}
         run: |
           CLUSTER=${{ github.event.inputs.cluster }}
           git fetch origin ${{ github.ref }}
@@ -75,6 +77,8 @@ jobs:
           done
 
       # - name: Apply changed apps manifests
+      #   env:
+      #     CLUSTER: ${{ github.event.inputs.cluster }}
       #   run: |
       #     CLUSTER=${{ github.event.inputs.cluster }}
       #     git fetch origin ${{ github.ref }}
