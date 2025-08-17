@@ -33,7 +33,7 @@ jobs:
               echo "${{ secrets.OPENVPN_CA_HOMELAB }}" > vpn/ca.crt
               echo "${{ secrets.OPENVPN_CERT_HOMELAB }}" > vpn/client.crt
               echo "${{ secrets.OPENVPN_KEY_HOMELAB }}" > vpn/client.key
-              echo "${{ secrets.OPENVPN_TLS_HOMELAB }}" > vpn/OpenVPN_Server_1-tls.key
+              echo "${{ secrets.OPENVPN_TLS_HOMELAB }}" > vpn/tls.key
               echo "${{ secrets.OPENVPN_CREDENTIALS_HOMELAB }}" > vpn/credentials.txt
               ;;
             *)
