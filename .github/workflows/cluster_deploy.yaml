@@ -57,12 +57,6 @@ jobs:
           DIFF: ${{ steps.git-diff-action.outputs.json-diff-path }}
         run: cat $DIFF
 
-      - name: Connect VPN
-        run: |
-          sudo openvpn --config ./vpn/client.ovpn --daemon
-          sleep 15
-          echo "VPN connected successfully."
-
       - name: Setup kubeconfig
         env:
           CLUSTER: ${{ github.event.inputs.cluster }}
@@ -81,7 +75,15 @@ jobs:
 
       - name: Test kubectl connection
         run: |
+          cat $HOME/.kube/config
+          cat ${{ github.event.pull_request.base.sha }}
           kubectl get pods -A
+
+      - name: Connect VPN
+        run: |
+          sudo openvpn --config ./vpn/client.ovpn --daemon
+          sleep 15
+          echo "VPN connected successfully."
 
       # - name: Apply changed apps manifests
       #   env:
