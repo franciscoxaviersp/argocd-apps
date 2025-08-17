@@ -99,6 +99,6 @@ jobs:
             echo "Dispatching deploy for cluster: $cluster"
             gh workflow run $WORKFLOW_ID \
               --ref $BRANCH \
-              --field cluster="$cluster"
+              -F cluster="$cluster"
           done
           
