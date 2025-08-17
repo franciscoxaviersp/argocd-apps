@@ -50,6 +50,8 @@ jobs:
           echo "VPN connected successfully."
 
       - name: Setup kubeconfig
+        env:
+          CLUSTER: ${{ github.event.inputs.cluster }}
         run: |
           mkdir -p $HOME/.kube
           case "$CLUSTER" in
@@ -67,7 +69,6 @@ jobs:
         env:
           CLUSTER: ${{ github.event.inputs.cluster }}
         run: |
-          CLUSTER=${{ github.event.inputs.cluster }}
           git fetch origin ${{ github.ref }}
           CHANGED_FILES=$(git diff --name-only origin/${{ github.event.base_ref }} ${{ github.sha }} -- clusters/${CLUSTER}/)
           echo "Applying changed files to cluster $CLUSTER:"
