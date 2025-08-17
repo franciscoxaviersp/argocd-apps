@@ -42,25 +42,10 @@ jobs:
               ;;
           esac
           cat vpn/client.ovpn
-      
-      - name: Verify CA certificate
-        run: |
-          echo "Checking CA certificate details..."
-
-          echo "${{ secrets.OPENVPN_SERVER }}" > vpn/server.crt
-          openssl verify -CAfile vpn/ca.crt vpn/server.crt
-          
-          # Optional: if you have server cert to verify against CA
-          # openssl verify -CAfile vpn/ca.crt vpn/server.crt
-        shell: bash
-      
-      - name: Test UDP connectivity to VPN
-        run: |
-          nc -vuz vpn.be-an-explorer.com 36047
 
       - name: Connect VPN
         run: |
-          sudo openvpn --config ./vpn/client.ovpn --verb 5
+          sudo openvpn --config ./vpn/client.ovpn --daemon
           sleep 15
           echo "VPN connected successfully."
 
