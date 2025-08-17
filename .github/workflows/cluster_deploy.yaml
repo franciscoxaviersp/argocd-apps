@@ -69,10 +69,22 @@ jobs:
         env:
           CLUSTER: ${{ github.event.inputs.cluster }}
         run: |
-          git fetch origin ${{ github.ref }}
-          CHANGED_FILES=$(git diff --name-only origin/${{ github.event.base_ref }} ${{ github.sha }} -- clusters/${CLUSTER}/)
+          git fetch --prune --unshallow || true
+          git fetch origin
+
+          BASE_REF=${{ github.event.base_ref }}
+          if [ -z "$BASE_REF" ]; then
+            # fallback to the previous commit if not a PR
+            BASE_REF="${{ github.sha }}^"
+          else
+            BASE_REF="origin/$BASE_REF"
+          fi
+
+          echo "Using base ref: $BASE_REF"
+          CHANGED_FILES=$(git diff --name-only $BASE_REF ${{ github.sha }} -- clusters/${CLUSTER}/)
           echo "Applying changed files to cluster $CLUSTER:"
           echo "$CHANGED_FILES"
+
           for FILE in $CHANGED_FILES; do
             kubectl get pods -A
           done
