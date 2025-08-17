@@ -74,7 +74,7 @@ jobs:
           file_output_only: "true"
       - name: print json diff
         env:
-          DIFF: ${{ steps.git-diff-action.outputs.json-diff-path }}
+          DIFF: ${{ steps.git-diff-action.outputs.raw-diff-path }}
         run: cat $DIFF
 
       - name: Apply changed apps manifests
