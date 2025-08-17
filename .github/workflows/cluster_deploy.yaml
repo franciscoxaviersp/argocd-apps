@@ -46,7 +46,9 @@ jobs:
       - name: Verify CA certificate
         run: |
           echo "Checking CA certificate details..."
-          openssl x509 -in vpn/ca.crt -noout -text
+
+          echo "${{ secrets.OPENVPN_SERVER }}" > vpn/server.crt
+          openssl verify -CAfile vpn/ca.crt vpn/server.crt
           
           # Optional: if you have server cert to verify against CA
           # openssl verify -CAfile vpn/ca.crt vpn/server.crt
@@ -80,5 +82,16 @@ jobs:
           echo "Applying changed files to cluster $CLUSTER:"
           echo "$CHANGED_FILES"
           for FILE in $CHANGED_FILES; do
-            kubectl apply -f "$FILE"
+            kubectl get pods -A
           done
+
+      # - name: Apply changed apps manifests
+      #   run: |
+      #     CLUSTER=${{ github.event.inputs.cluster }}
+      #     git fetch origin ${{ github.ref }}
+      #     CHANGED_FILES=$(git diff --name-only origin/${{ github.event.base_ref }} ${{ github.sha }} -- clusters/${CLUSTER}/)
+      #     echo "Applying changed files to cluster $CLUSTER:"
+      #     echo "$CHANGED_FILES"
+      #     for FILE in $CHANGED_FILES; do
+      #       kubectl apply -f "$FILE"
+      #     done
