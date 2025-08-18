@@ -14,6 +14,7 @@ jobs:
       actions: write
     steps:
       - name: Checkout repo
+        id: checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -36,17 +37,6 @@ jobs:
           UNIQUE_CLUSTERS=$(echo $CLUSTERS | tr ' ' '\n' | sort -u | tr '\n' ' ')
           echo "clusters=$UNIQUE_CLUSTERS" >> $GITHUB_OUTPUT
 
-      - name: echo url
-        id: echo-url
-        run: |
-          echo https://api.github.com/repos/${{ github.repository }}/actions/workflows/cluster-deploy.yaml/dispatches
-      - name: echo ref
-        id: echo-ref
-        run: |
-          echo ${{ github.ref }}
-      - name: List workflows
-        run: ls -l .github/workflows/
-
       - name: Get workflow ID
         id: workflow-id
         run: |
@@ -57,37 +47,8 @@ jobs:
             | jq ".workflows[] | select(.path==\"$WORKFLOW_NAME\") | .id")
           echo "workflow_id=$ID" >> $GITHUB_OUTPUT
 
-      # - name: Dispatch workflows per cluster
-      #   if: steps.detect.outputs.clusters != ''
-      #   run: |
-      #     IFS=' ' read -r -a clusters <<< "${{ steps.detect.outputs.clusters }}"
-      #     WORKFLOW_ID="${{ steps.workflow-id.outputs.workflow_id }}"
-      #     BRANCH="${GITHUB_HEAD_REF:-main}"
-      #     echo $WORKFLOW_ID
-      #     echo $BRANCH
-      #     for cluster in "${clusters[@]}"; do
-      #       echo "Dispatching deploy for cluster: $cluster"
-      #       RESPONSE=$(curl -L \
-      #         -X POST \
-      #         -H "Accept: application/vnd.github+json" \
-      #         -H "Authorization: Bearer ${{ secrets.TRIGGER_WORKFLOW_TOKEN }}" \
-      #         https://api.github.com/repos/${{ github.repository }}/actions/workflows/$WORKFLOW_ID/dispatches \
-      #         -d "{\"ref\":\"$BRANCH\",\"inputs\":{\"cluster\":\"$cluster\"}}" \
-      #         -w "%{http_code}" -o /dev/null)
-      #       if [ "$RESPONSE" -ne 204 ]; then
-      #         echo "Error: Failed to dispatch workflow for cluster: $cluster (HTTP status: $RESPONSE)"
-      #         exit 1
-      #       fi
-      #     done
-
-      - name: List workflows
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          BRANCH="${GITHUB_HEAD_REF:-main}"
-          gh workflow list
-
       - name: Dispatch workflows per cluster
+        id: dispatch
         if: steps.detect.outputs.clusters != ''
         env:
           GH_TOKEN: ${{ github.token }}
@@ -100,7 +61,6 @@ jobs:
             gh workflow run $WORKFLOW_ID \
               --ref $BRANCH \
               -F cluster="$cluster" \
-              -F base_branch="${{ github.event.pull_request.base.ref }}" \
               -F head_ref="${{ github.event.pull_request.head.ref }}"
           done
-          
+# -F base_branch="${{ github.event.pull_request.base.ref }}" \

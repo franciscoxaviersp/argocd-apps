@@ -8,10 +8,10 @@ on:
         required: true
       base_branch:
         description: 'Base branch for the deployment'
-        required: true
+        required: false
       head_ref:
         description: 'Head ref for the deployment'
-        required: true
+        required: false
 
 jobs:
   deploy:
@@ -56,6 +56,8 @@ jobs:
       
       - uses: GrantBirki/git-diff-action@v2.8.1
         id: git-diff-action
+        env:
+          CLUSTER: ${{ github.event.inputs.cluster }}
         with:
           base_branch: ${{ github.event.inputs.base_branch }}
           json_diff_file_output: diff.json
@@ -92,9 +94,18 @@ jobs:
         env:
           DIFF: ${{ steps.git-diff-action.outputs.json-diff-path }}
         run: |
-          for path in $(jq -r '.files[].path' $DIFF); do
-            echo "Running command for $path"
-            cat $path
-            # Example: run kubectl apply
-            echo "kubectl apply -f $path"
-          done
+          if [ -z "$BASE_BRANCH" ]; then
+            echo "No base_branch provided. Applying all files in ./clusters/$CLUSTER/"
+            for path in ./clusters/$CLUSTER/*.yaml; do
+              echo "kubectl apply -f $path"
+              # uncomment when ready:
+              # kubectl apply -f $path
+            done
+          else
+            echo "Applying only diffed files from $BASE_BRANCH..."
+            for path in $(jq -r '.files[].path' $DIFF); do
+              echo "kubectl apply -f $path"
+              # uncomment when ready:
+              # kubectl apply -f $path
+            done
+          fi
