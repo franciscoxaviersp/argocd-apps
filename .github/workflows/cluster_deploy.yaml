@@ -17,6 +17,11 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Generate diff manually
         env:
           CLUSTER: ${{ github.event.inputs.cluster }}
@@ -25,7 +30,9 @@ jobs:
         run: |
           git fetch origin $BASE_SHA
           git fetch origin $MERGE_SHA
-          git diff --name-only $BASE_SHA $MERGE_SHA || true
+          git diff --name-only $BASE_SHA $MERGE_SHA > test.txt || true
+          echo "Changed files:"
+          cat test.txt
           git diff --name-only $BASE_SHA $MERGE_SHA \
             | grep "^clusters/${CLUSTER}/.*\.yaml$" > diff.txt || true
           echo "Diffed files:"
