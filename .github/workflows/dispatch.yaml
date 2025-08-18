@@ -1,10 +1,10 @@
 name: Dispatch Cluster Deployments
 
 on:
-  # pull_request_target:
-  #   types: [closed]
+  pull_request_target:
+    types: [closed]
   
-  - pull_request
+  # - pull_request
 
 jobs:
   detect-and-dispatch:
@@ -51,8 +51,7 @@ jobs:
         run: |
           git fetch origin ${{ github.event.pull_request.base.sha }}
           git fetch origin ${{ github.event.pull_request.merge_commit_sha }}
-          git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.merge_commit_sha }} \
-            | grep "^clusters/homelab/.*\.yaml$" > diff.txt || true
+          git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.merge_commit_sha }} > diff.txt || true
           cat diff.txt
 
       # - name: Dispatch workflows per cluster
