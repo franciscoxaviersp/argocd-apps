@@ -88,21 +88,12 @@ jobs:
           sleep 15
           echo "VPN connected successfully."
 
-      - name: Test kubectl connection
+      - name: Loop over diff and apply changes
+        env:
+          DIFF: ${{ steps.git-diff-action.outputs.json-diff-path }}
         run: |
-          cat $HOME/.kube/config
-          echo ${{ github.event.pull_request.base.ref }}
-          kubectl get pods -A
-
-      # - name: Apply changed apps manifests
-      #   env:
-      #     CLUSTER: ${{ github.event.inputs.cluster }}
-      #   run: |
-      #     CLUSTER=${{ github.event.inputs.cluster }}
-      #     git fetch origin ${{ github.ref }}
-      #     CHANGED_FILES=$(git diff --name-only origin/${{ github.event.base_ref }} ${{ github.sha }} -- clusters/${CLUSTER}/)
-      #     echo "Applying changed files to cluster $CLUSTER:"
-      #     echo "$CHANGED_FILES"
-      #     for FILE in $CHANGED_FILES; do
-      #       kubectl apply -f "$FILE"
-      #     done
+          for path in $(jq -r '.files[].path' $DIFF); do
+            echo "Running command for $path"
+            # Example: run kubectl apply
+            echo "kubectl apply -f $path"
+          done
