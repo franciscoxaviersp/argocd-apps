@@ -17,7 +17,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout repo
+        id: checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
