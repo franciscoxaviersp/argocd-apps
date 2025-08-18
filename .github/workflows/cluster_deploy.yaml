@@ -73,6 +73,7 @@ jobs:
           mkdir -p $HOME/.kube
           case "$CLUSTER" in
             homelab)
+              echo "${{ secrets.KUBECONFIG_HOMELAB }}"
               echo "${{ secrets.KUBECONFIG_HOMELAB }}" > $HOME/.kube/config
               ;;
             *)
