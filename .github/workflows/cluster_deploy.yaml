@@ -9,7 +9,7 @@ on:
       base_branch:
         description: 'Base branch for the deployment'
         required: false
-      head_sha:
+      merge_commit_sha:
         description: 'Head ref for the deployment'
         required: false
 
