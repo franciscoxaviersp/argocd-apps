@@ -94,6 +94,7 @@ jobs:
         run: |
           for path in $(jq -r '.files[].path' $DIFF); do
             echo "Running command for $path"
+            cat $path
             # Example: run kubectl apply
             echo "kubectl apply -f $path"
           done
