@@ -62,7 +62,7 @@ jobs:
               --ref $BRANCH \
               -F cluster="$cluster" \
               -F base_branch="${{ github.event.pull_request.base.sha }}" \
-              -F head_shaf="${{ github.event.pull_request.head.sha }}"
+              -F head_sha="${{ github.event.pull_request.head.sha }}"
           done
 
       # Uncomment the following section if you want to test VPN connectivity (make sure to set the cluster in the inputs)
