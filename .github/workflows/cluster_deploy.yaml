@@ -73,7 +73,6 @@ jobs:
           mkdir -p $HOME/.kube
           case "$CLUSTER" in
             homelab)
-              echo "${{ secrets.KUBECONFIG_HOMELAB }}"
               echo "${{ secrets.KUBECONFIG_HOMELAB }}" > $HOME/.kube/config
               ;;
             *)
@@ -83,17 +82,17 @@ jobs:
           esac
           chmod 600 $HOME/.kube/config
 
-      - name: Test kubectl connection
-        run: |
-          cat $HOME/.kube/config
-          echo ${{ github.event.pull_request.base.ref }}
-          kubectl get pods -A
-
       - name: Connect VPN
         run: |
           sudo openvpn --config ./vpn/client.ovpn --daemon
           sleep 15
           echo "VPN connected successfully."
+
+      - name: Test kubectl connection
+        run: |
+          cat $HOME/.kube/config
+          echo ${{ github.event.pull_request.base.ref }}
+          kubectl get pods -A
 
       # - name: Apply changed apps manifests
       #   env:
