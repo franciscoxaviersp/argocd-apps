@@ -46,31 +46,24 @@ jobs:
             https://api.github.com/repos/${{ github.repository }}/actions/workflows \
             | jq ".workflows[] | select(.path==\"$WORKFLOW_NAME\") | .id")
           echo "workflow_id=$ID" >> $GITHUB_OUTPUT
-      
-      - name: Generate diff manually
-        run: |
-          git fetch origin ${{ github.event.pull_request.base.sha }}
-          git fetch origin ${{ github.event.pull_request.merge_commit_sha }}
-          git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.merge_commit_sha }} > diff.txt || true
-          cat diff.txt
 
-      # - name: Dispatch workflows per cluster
-      #   id: dispatch
-      #   if: steps.detect.outputs.clusters != ''
-      #   env:
-      #     GH_TOKEN: ${{ github.token }}
-      #   run: |
-      #     IFS=' ' read -r -a clusters <<< "${{ steps.detect.outputs.clusters }}"
-      #     WORKFLOW_ID="${{ steps.workflow-id.outputs.workflow_id }}"
-      #     BRANCH="${GITHUB_HEAD_REF:-main}"
-      #     for cluster in "${clusters[@]}"; do
-      #       echo "Dispatching deploy for cluster: $cluster"
-      #       gh workflow run $WORKFLOW_ID \
-      #         --ref $BRANCH \
-      #         -F cluster="$cluster" \
-      #         -F base_branch="${{ github.event.pull_request.base.ref }}" \
-      #         -F merge_commit_sha="${{ github.event.pull_request.merge_commit_sha }}"
-      #     done
+      - name: Dispatch workflows per cluster
+        id: dispatch
+        if: steps.detect.outputs.clusters != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          IFS=' ' read -r -a clusters <<< "${{ steps.detect.outputs.clusters }}"
+          WORKFLOW_ID="${{ steps.workflow-id.outputs.workflow_id }}"
+          BRANCH="${GITHUB_HEAD_REF:-main}"
+          for cluster in "${clusters[@]}"; do
+            echo "Dispatching deploy for cluster: $cluster"
+            gh workflow run $WORKFLOW_ID \
+              --ref $BRANCH \
+              -F cluster="$cluster" \
+              -F base_sha="${{ github.event.pull_request.base.sha }}" \
+              -F merge_commit_sha="${{ github.event.pull_request.merge_commit_sha }}"
+          done
 
       # Uncomment the following section if you want to test VPN connectivity (make sure to set the cluster in the inputs)
       # - name: Get vpn test workflow ID
