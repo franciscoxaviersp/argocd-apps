@@ -21,7 +21,6 @@ jobs:
       
       - name: Generate diff manually
         env:
-          CLUSTER: ${{ github.event.inputs.cluster }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
         run: |
@@ -31,7 +30,7 @@ jobs:
           echo "Changed files:"
           cat test.txt
           git diff --name-only $BASE_SHA $MERGE_SHA \
-            | grep "^clusters/${CLUSTER}/.*\.yaml$" > diff.txt || true
+            | grep -E "^(\./)?clusters/homelab/.*\.yaml$" > diff.txt || true
           echo "Diffed files:"
           cat diff.txt
 
