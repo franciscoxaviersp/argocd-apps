@@ -61,7 +61,7 @@ jobs:
             gh workflow run $WORKFLOW_ID \
               --ref $BRANCH \
               -F cluster="$cluster" \
-              -F base_branch="${{ github.event.pull_request.base.sha }}" \
+              -F base_branch="${{ github.event.pull_request.base.ref }}" \
               -F head_sha="${{ github.event.pull_request.head.sha }}"
           done
 
