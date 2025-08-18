@@ -52,7 +52,6 @@ jobs:
               exit 1
               ;;
           esac
-          cat vpn/client.ovpn
       
       - uses: GrantBirki/git-diff-action@v2.8.1
         id: git-diff-action
@@ -92,6 +91,7 @@ jobs:
 
       - name: Loop over diff and apply changes
         env:
+          CLUSTER: ${{ github.event.inputs.cluster }}
           DIFF: ${{ steps.git-diff-action.outputs.json-diff-path }}
         run: |
           if [ -z "$BASE_BRANCH" ]; then

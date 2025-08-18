@@ -1,0 +1,50 @@
+name: Deploy to Cluster
+
+on:
+  workflow_dispatch:
+    inputs:
+      cluster:
+        description: 'Cluster name to deploy to'
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install OpenVPN client
+        run: sudo apt-get update && sudo apt-get install -y openvpn
+
+      - name: Prepare VPN config & certs
+        env:
+          CLUSTER: ${{ github.event.inputs.cluster }}
+        run: |
+          mkdir -p vpn
+          case "$CLUSTER" in
+            homelab)
+              echo "${{ secrets.OPENVPN_CONF_HOMELAB }}" > vpn/client.ovpn
+              echo "${{ secrets.OPENVPN_CA_HOMELAB }}" > vpn/ca.crt
+              echo "${{ secrets.OPENVPN_CERT_HOMELAB }}" > vpn/client.crt
+              echo "${{ secrets.OPENVPN_KEY_HOMELAB }}" > vpn/client.key
+              echo "${{ secrets.OPENVPN_TLS_HOMELAB }}" > vpn/tls.key
+              echo "${{ secrets.OPENVPN_CREDENTIALS_HOMELAB }}" > vpn/credentials.txt
+              ;;
+            *)
+              echo "Unknown cluster $CLUSTER"
+              exit 1
+              ;;
+          esac
+
+      - name: Connect VPN
+        run: |
+          sudo openvpn --config ./vpn/client.ovpn --daemon
+          sleep 15
+          echo "VPN connected successfully."
+
+      - name: Verify VPN tunnel interface
+        run: |
+          if ip a | grep -q "tun0"; then
+            echo "✅ VPN tunnel interface detected."
+          else
+            echo "❌ VPN tunnel not found!"
+            exit 1
+          fi
