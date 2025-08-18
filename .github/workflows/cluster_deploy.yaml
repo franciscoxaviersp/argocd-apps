@@ -9,7 +9,7 @@ on:
       base_branch:
         description: 'Base branch for the deployment'
         required: false
-      head_ref:
+      head_sha:
         description: 'Head ref for the deployment'
         required: false
 
@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.inputs.head_ref }}
+          ref: ${{ github.event.inputs.head_sha }}
       - name: Fetch base branch
         run: git fetch origin ${{ github.event.inputs.base_branch }}:${{ github.event.inputs.base_branch }}
 

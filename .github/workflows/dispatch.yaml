@@ -1,7 +1,7 @@
 name: Dispatch Cluster Deployments
 
 on:
-  # pull_request:
+  # pull_request_target:
   #   types: [closed]
   - pull_request
 
@@ -61,8 +61,8 @@ jobs:
             gh workflow run $WORKFLOW_ID \
               --ref $BRANCH \
               -F cluster="$cluster" \
-              -F base_branch="${{ github.event.pull_request.base.ref }}" \
-              -F head_ref="${{ github.event.pull_request.head.ref }}"
+              -F base_branch="${{ github.event.pull_request.base.sha }}" \
+              -F head_shaf="${{ github.event.pull_request.head.sha }}"
           done
 
       # Uncomment the following section if you want to test VPN connectivity (make sure to set the cluster in the inputs)
