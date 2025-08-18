@@ -18,11 +18,30 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      
+      - name: Generate diff manually
+        env:
+          CLUSTER: ${{ github.event.inputs.cluster }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+        run: |
+          git fetch origin $BASE_SHA
+          git fetch origin $MERGE_SHA
+          git diff --name-only $BASE_SHA $MERGE_SHA > test.txt || true
+          echo "Changed files:"
+          cat test.txt
+          git diff --name-only $BASE_SHA $MERGE_SHA \
+            | grep "^clusters/${CLUSTER}/.*\.yaml$" > diff.txt || true
+          echo "Diffed files:"
+          cat diff.txt
 
       - name: Detect changed clusters
         id: detect
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
         run: |
-          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})
+          CHANGED_FILES=$(git diff --name-only $BASE_SHA $MERGE_SHA)
           echo "Changed files:"
           echo "$CHANGED_FILES"
 
