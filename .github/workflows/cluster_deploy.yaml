@@ -26,14 +26,11 @@ jobs:
       - name: Generate diff manually
         env:
           CLUSTER: ${{ github.event.inputs.cluster }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          BASE_SHA: ${{ github.event.inputs.base_sha }}
+          MERGE_SHA: ${{ github.event.inputs.merge_commit_sha }}
         run: |
           git fetch origin $BASE_SHA
           git fetch origin $MERGE_SHA
-          git diff --name-only $BASE_SHA $MERGE_SHA > test.txt || true
-          echo "Changed files:"
-          cat test.txt
           git diff --name-only $BASE_SHA $MERGE_SHA \
             | grep "^clusters/${CLUSTER}/.*\.yaml$" > diff.txt || true
           echo "Diffed files:"
@@ -66,20 +63,6 @@ jobs:
               exit 1
               ;;
           esac
-      
-      # - uses: GrantBirki/git-diff-action@v2.8.1
-      #   id: git-diff-action
-      #   env:
-      #     CLUSTER: ${{ github.event.inputs.cluster }}
-      #   with:
-      #     base_branch: ${{ github.event.inputs.base_branch }}
-      #     json_diff_file_output: diff.json
-      #     file_output_only: "true"
-      #     search_path: ./clusters/${CLUSTER}/*.yaml
-      # - name: print json diff
-      #   env:
-      #     DIFF: ${{ steps.git-diff-action.outputs.json-diff-path }}
-      #   run: cat $DIFF
 
       - name: Setup kubeconfig
         env:
@@ -97,26 +80,27 @@ jobs:
           esac
           chmod 600 $HOME/.kube/config
 
-      # - name: Connect VPN
-      #   run: |
-      #     sudo openvpn --config ./vpn/client.ovpn --daemon
-      #     sleep 15
-      #     echo "VPN connected successfully."
+      - name: Connect VPN
+        run: |
+          sudo openvpn --config ./vpn/client.ovpn --daemon
+          sleep 15
+          echo "VPN connected successfully."
 
-      # - name: Loop over diff and apply changes
-      #   env:
-      #     BASE_BRANCH: ${{ github.event.inputs.base_branch }}
-      #     CLUSTER: ${{ github.event.inputs.cluster }}
-      #     DIFF: ${{ steps.git-diff-action.outputs.json-diff-path }}
-      #   run: |
-      #     if [ -z "$BASE_BRANCH" ]; then
-      #       echo "No base_branch provided. Applying all files in ./clusters/$CLUSTER/"
-      #       for path in ./clusters/$CLUSTER/*.yaml; do
-      #         kubectl apply -f $path
-      #       done
-      #     else
-      #       echo "Applying only diffed files from $BASE_BRANCH..."
-      #       for path in $(jq -r '.files[].path' $DIFF); do
-      #         kubectl apply -f $path
-      #       done
-      #     fi
+      - name: Loop over diff and apply changes
+        env:
+          BASE_BRANCH: ${{ github.event.inputs.base_sha }}
+          CLUSTER: ${{ github.event.inputs.cluster }}
+        run: |
+          if [ -z "$BASE_BRANCH" ]; then
+            echo "No base_branch provided. Applying all files in ./clusters/$CLUSTER/"
+            for path in ./clusters/$CLUSTER/*.yaml; do
+              kubectl apply -f $path
+            done
+          else
+            echo "Applying only diffed files from $BASE_BRANCH..."
+            while IFS= read -r file; do
+              echo "Processing $file"
+              # Run your command here, for example:
+              kubectl apply -f "$file"
+            done < diff.txt
+          fi
