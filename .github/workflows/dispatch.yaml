@@ -1,0 +1,89 @@
+name: Dispatch Cluster Deployments
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  detect-and-dispatch:
+    # if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - name: Checkout repo
+        id: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed clusters
+        id: detect
+        run: |
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          CLUSTERS=""
+          for FILE in $CHANGED_FILES; do
+            if [[ "$FILE" == clusters/*/*.yaml ]]; then
+              CLUSTER_NAME=$(echo "$FILE" | cut -d'/' -f2)
+              CLUSTERS="$CLUSTERS $CLUSTER_NAME"
+            fi
+          done
+
+          UNIQUE_CLUSTERS=$(echo $CLUSTERS | tr ' ' '\n' | sort -u | tr '\n' ' ')
+          echo "clusters=$UNIQUE_CLUSTERS" >> $GITHUB_OUTPUT
+
+      - name: Get workflow ID
+        id: workflow-id
+        run: |
+          WORKFLOW_NAME=".github/workflows/cluster_deploy.yaml"
+          ID=$(curl -s -H "Authorization: Bearer ${{ secrets.TRIGGER_WORKFLOW_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows \
+            | jq ".workflows[] | select(.path==\"$WORKFLOW_NAME\") | .id")
+          echo "workflow_id=$ID" >> $GITHUB_OUTPUT
+
+      - name: Dispatch workflows per cluster
+        id: dispatch
+        if: steps.detect.outputs.clusters != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          IFS=' ' read -r -a clusters <<< "${{ steps.detect.outputs.clusters }}"
+          WORKFLOW_ID="${{ steps.workflow-id.outputs.workflow_id }}"
+          BRANCH="${GITHUB_HEAD_REF:-main}"
+          for cluster in "${clusters[@]}"; do
+            echo "Dispatching deploy for cluster: $cluster"
+            gh workflow run $WORKFLOW_ID \
+              --ref $BRANCH \
+              -F cluster="$cluster" \
+              -F base_branch="${{ github.event.pull_request.base.ref }}" \
+              -F head_ref="${{ github.event.pull_request.head.ref }}"
+          done
+
+      # Uncomment the following section if you want to test VPN connectivity (make sure to set the cluster in the inputs)
+      # - name: Get vpn test workflow ID
+      #   id: vpn-test-workflow-id
+      #   run: |
+      #     WORKFLOW_NAME=".github/workflows/test_vpn.yaml"
+      #     ID=$(curl -s -H "Authorization: Bearer ${{ secrets.TRIGGER_WORKFLOW_TOKEN }}" \
+      #       -H "Accept: application/vnd.github+json" \
+      #       https://api.github.com/repos/${{ github.repository }}/actions/workflows \
+      #       | jq ".workflows[] | select(.path==\"$WORKFLOW_NAME\") | .id")
+      #     echo "workflow_id=$ID" >> $GITHUB_OUTPUT
+
+      # - name: Dispatch test VPN workflow
+      #   id: dispatch-test-vpn
+      #   env:
+      #     GH_TOKEN: ${{ github.token }}
+      #   run: |
+      #     WORKFLOW_ID="${{ steps.vpn-test-workflow-id.outputs.workflow_id }}"
+      #     BRANCH="${GITHUB_HEAD_REF:-main}"
+      #     gh workflow run $WORKFLOW_ID \
+      #       --ref $BRANCH \
+      #       -F cluster="homelab" \
+      #       -F base_branch="${{ github.event.pull_request.base.ref }}" \
+      #       -F head_ref="${{ github.event.pull_request.head.ref }}"
