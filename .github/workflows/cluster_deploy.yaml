@@ -98,15 +98,11 @@ jobs:
           if [ -z "$BASE_BRANCH" ]; then
             echo "No base_branch provided. Applying all files in ./clusters/$CLUSTER/"
             for path in ./clusters/$CLUSTER/*.yaml; do
-              echo "kubectl apply -f $path"
-              # uncomment when ready:
-              # kubectl apply -f $path
+              kubectl apply -f $path
             done
           else
             echo "Applying only diffed files from $BASE_BRANCH..."
             for path in $(jq -r '.files[].path' $DIFF); do
-              echo "kubectl apply -f $path"
-              # uncomment when ready:
-              # kubectl apply -f $path
+              kubectl apply -f $path
             done
           fi
