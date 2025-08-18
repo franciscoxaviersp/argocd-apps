@@ -91,6 +91,7 @@ jobs:
 
       - name: Loop over diff and apply changes
         env:
+          BASE_BRANCH: ${{ github.event.inputs.base_branch }}
           CLUSTER: ${{ github.event.inputs.cluster }}
           DIFF: ${{ steps.git-diff-action.outputs.json-diff-path }}
         run: |
