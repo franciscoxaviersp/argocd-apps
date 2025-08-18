@@ -3,6 +3,8 @@ name: Dispatch Cluster Deployments
 on:
   pull_request_target:
     types: [closed]
+  
+  # - pull_request
 
 jobs:
   detect-and-dispatch:
@@ -49,8 +51,8 @@ jobs:
         run: |
           git fetch origin ${{ github.event.pull_request.base.sha }}
           git fetch origin ${{ github.event.pull_request.merge_commit_sha }}
-          git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.merge_commit_sha }} \
-            | grep "^clusters/homelab/.*\.yaml$" > diff.txt
+          git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.merge_commit_sha }} > diff.txt || true
+          cat diff.txt
 
       # - name: Dispatch workflows per cluster
       #   id: dispatch
@@ -67,7 +69,7 @@ jobs:
       #         --ref $BRANCH \
       #         -F cluster="$cluster" \
       #         -F base_branch="${{ github.event.pull_request.base.ref }}" \
-      #         -F head_sha="${{ github.event.pull_request.head.sha }}"
+      #         -F merge_commit_sha="${{ github.event.pull_request.merge_commit_sha }}"
       #     done
 
       # Uncomment the following section if you want to test VPN connectivity (make sure to set the cluster in the inputs)
