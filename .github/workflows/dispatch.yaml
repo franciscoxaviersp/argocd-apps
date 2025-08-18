@@ -1,13 +1,11 @@
 name: Dispatch Cluster Deployments
 
 on:
-  # pull_request_target:
-  #   types: [closed]
-  - pull_request
+  pull_request_target:
+    types: [closed]
 
 jobs:
   detect-and-dispatch:
-    # if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
       contents: write
