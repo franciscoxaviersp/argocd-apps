@@ -3,7 +3,7 @@ name: Dispatch Cluster Deployments
 on:
   # pull_request:
   #   types: [closed]
-  - push
+  - pull_request
 
 jobs:
   detect-and-dispatch:
