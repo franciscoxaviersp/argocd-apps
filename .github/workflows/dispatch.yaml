@@ -50,7 +50,7 @@ jobs:
           git fetch origin ${{ github.event.pull_request.base.sha }}
           git fetch origin ${{ github.event.pull_request.merge_commit_sha }}
           git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.merge_commit_sha }} \
-            | grep "^clusters/${{ github.event.inputs.cluster }}/.*\.yaml$" > diff.txt
+            | grep "^clusters/homelab/.*\.yaml$" > diff.txt
 
       # - name: Dispatch workflows per cluster
       #   id: dispatch
