@@ -9,7 +9,7 @@ on:
       base_branch:
         description: 'Base branch for the deployment'
         required: false
-      head_ref:
+      head_sha:
         description: 'Head ref for the deployment'
         required: false
 
@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.inputs.head_ref }}
+          ref: ${{ github.event.inputs.head_sha }}
       - name: Fetch base branch
         run: git fetch origin ${{ github.event.inputs.base_branch }}:${{ github.event.inputs.base_branch }}
 
@@ -98,15 +98,11 @@ jobs:
           if [ -z "$BASE_BRANCH" ]; then
             echo "No base_branch provided. Applying all files in ./clusters/$CLUSTER/"
             for path in ./clusters/$CLUSTER/*.yaml; do
-              echo "kubectl apply -f $path"
-              # uncomment when ready:
-              # kubectl apply -f $path
+              kubectl apply -f $path
             done
           else
             echo "Applying only diffed files from $BASE_BRANCH..."
             for path in $(jq -r '.files[].path' $DIFF); do
-              echo "kubectl apply -f $path"
-              # uncomment when ready:
-              # kubectl apply -f $path
+              kubectl apply -f $path
             done
           fi
