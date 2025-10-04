@@ -3,7 +3,7 @@ kind: Application
 metadata:
   name: vpa
   namespace: argocd
-spec: #
+spec:
   project: default
   source:
     repoURL: https://cowboysysop.github.io/charts
