@@ -39,6 +39,13 @@ jobs:
 
           UNIQUE_CLUSTERS=$(echo $CLUSTERS | tr ' ' '\n' | sort -u | tr '\n' ' ')
           echo "clusters=$UNIQUE_CLUSTERS" >> $GITHUB_OUTPUT
+          # Also write clusters to a file for later steps (robust across contexts)
+          echo "$UNIQUE_CLUSTERS" > clusters.txt
+
+      - name: Debug detected clusters output
+        run: |
+          echo "detected clusters (raw): '${{ steps.detect.outputs.clusters }}'"
+          echo "detected clusters (file): '$(cat clusters.txt || true)'"
 
       - name: Get workflow ID
         id: workflow-id
