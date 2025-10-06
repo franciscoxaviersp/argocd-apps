@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: envoy-crds
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: gateway-crds-helm
+    repoURL: docker.io/envoyproxy
+    targetRevision: v1.5.2
+    helm:
+      values: |
+        crds:
+          gatewayAPI:
+            enabled: true
+            channel: standard   # Available options: standard, experimental
+          envoyGateway:
+            enabled: true
+  destination:
+    namespace: envoy-gateway-system
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    syncOptions:
+    - ServerSideApply=true
+    automated:
+      prune: true
+      selfHeal: true
