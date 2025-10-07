@@ -11,7 +11,7 @@ spec:
     targetRevision: 1.19.0
     helm:
       values: |
-        name:
+        provider:
           name: cloudflare
         env:
           - name: CF_API_TOKEN
