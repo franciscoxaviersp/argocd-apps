@@ -19,6 +19,8 @@ spec:
               secretKeyRef:
                 name: cloudflare-api-key
                 key: apiKey
+        sources:
+          - crd
   destination:
     namespace: infra
     server: https://kubernetes.default.svc
