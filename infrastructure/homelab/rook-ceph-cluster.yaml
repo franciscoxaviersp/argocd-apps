@@ -716,7 +716,7 @@ spec:
         csiDriverNamePrefix:
   destination:
     server: https://kubernetes.default.svc
-    namespace: kube-system
+    namespace: rook-ceph
   syncPolicy:
     syncOptions:
     - CreateNamespace=true
