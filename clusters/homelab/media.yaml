@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: homelab-media-apps
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/franciscoxaviersp/argocd-apps.git
+    targetRevision: main
+    path: media/homelab
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
