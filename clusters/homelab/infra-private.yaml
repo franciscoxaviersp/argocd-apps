@@ -1,20 +1,18 @@
+
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: coredns
+  name: private-apps
   namespace: argocd
 spec:
   project: default
   source:
-    chart: coredns
-    repoURL: https://coredns.github.io/helm
-    targetRevision: 1.45.0
-    helm:
-      values: |
-        isClusterService: false
+    repoURL: git@github.com:franciscoxaviersp/argocd-clusters.git
+    targetRevision: HEAD
+    path: homelab
   destination:
-    namespace: infra
     server: https://kubernetes.default.svc
+    namespace: argocd
   syncPolicy:
     automated:
       prune: true
