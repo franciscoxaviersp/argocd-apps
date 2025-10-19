@@ -13,6 +13,10 @@ spec:
       values: |
         provider:
           name: cloudflare
+        domainFilters:
+          - "be-an-explorer.com"
+        excludeDomains:
+          - "local.be-an-explorer.com"
         env:
           - name: CF_API_TOKEN
             valueFrom:
