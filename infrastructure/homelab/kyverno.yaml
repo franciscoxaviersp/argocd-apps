@@ -9,6 +9,10 @@ spec:
     repoURL: https://kyverno.github.io/kyverno/
     targetRevision: 3.5.2
     chart: kyverno
+    helm:
+      values: |
+        crds:
+          install: true
   destination:
     server: https://kubernetes.default.svc
     namespace: infra
