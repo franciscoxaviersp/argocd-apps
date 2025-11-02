@@ -11,6 +11,8 @@ spec:
     path: jellyfin
     helm:
       values: |
+        nodeSelector:
+          workload.homelab.io/transcoding=true
         persistence:
           config:
             size: 5Gi
