@@ -23,7 +23,7 @@ spec:
             accessModes:
             - ReadWriteOnce
           media:
-            size: 200Gi
+            size: 800Gi
             accessModes:
             - ReadWriteMany
             storageClass: "ceph-filesystem"
