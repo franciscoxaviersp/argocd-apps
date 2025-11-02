@@ -12,7 +12,7 @@ spec:
     helm:
       values: |
         nodeSelector:
-          workload.homelab.io/transcoding=true
+          workload.homelab.io/transcoding: true
         persistence:
           config:
             size: 5Gi
