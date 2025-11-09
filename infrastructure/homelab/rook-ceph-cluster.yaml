@@ -146,11 +146,6 @@ spec:
             # The mons should be on unique nodes. For production, at least 3 nodes are recommended for this reason.
             # Mons should only be allowed on the same node for test environments where data loss is acceptable.
             allowMultiplePerNode: false
-            volumeClaimTemplate:
-              spec:
-                resources:
-                  requests:
-                    storage: 15Gi
 
           mgr:
             # When higher availability of the mgr is needed, increase the count to 2.
