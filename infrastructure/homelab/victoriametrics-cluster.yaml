@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: victoriametrics
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://victoriametrics.github.io/helm-charts/
+    targetRevision: 0.32.0
+    chart: victoria-metrics-cluster
+    helm:
+      values: |
+        vmstorage:
+          replicaCount: 1
+          retentionPeriod: 1
+          persistentVolume:
+            enabled: true
+            size: 20Gi
+        vminsert:
+          replicaCount: 1
+        vmselect:
+          replicaCount: 1
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitor
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

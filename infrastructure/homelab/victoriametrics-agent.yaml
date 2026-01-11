@@ -1,0 +1,52 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: victoriametrics-agent
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://victoriametrics.github.io/helm-charts/
+    targetRevision: 0.29.0
+    chart: victoria-metrics-agent
+    helm:
+      values: |
+        remoteWrite:
+          - url: http://victoriametrics-victoria-metrics-cluster-vminsert.monitor.svc.cluster.local:8480/insert/0/prometheus
+        extraScrapeConfigs:
+          - job_name: node-exporter
+            kubernetes_sd_configs:
+              - role: pod
+            relabel_configs:
+              - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+                regex: prometheus-node-exporter
+                action: keep
+
+              # Map pod node name to 'node' label (used by dashboards)
+              - source_labels: [__meta_kubernetes_pod_node_name]
+                target_label: node
+
+              # Map pod IP + container port to '__address__'
+              # Use annotation 'prometheus.io/port' if present, otherwise default to 9100
+              - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_port]
+                target_label: __tmp_port
+              - replacement: "9100"
+                target_label: __tmp_port
+                action: replace
+                regex: ""
+              - source_labels: [__meta_kubernetes_pod_ip, __tmp_port]
+                separator: ":"
+                target_label: __address__
+
+              # Set the job label for dashboards
+              - replacement: node-exporter
+                target_label: job
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitor
+  syncPolicy:
+    syncOptions:
+    - ServerSideApply=true
+    automated:
+      prune: true
+      selfHeal: true
