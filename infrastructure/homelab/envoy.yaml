@@ -9,6 +9,11 @@ spec:
     chart: gateway-helm
     repoURL: docker.io/envoyproxy
     targetRevision: v1.5.2
+    helm:
+      values: |
+        crds:
+          gatewayAPI:
+            enabled: false
   destination:
     namespace: envoy
     server: https://kubernetes.default.svc
