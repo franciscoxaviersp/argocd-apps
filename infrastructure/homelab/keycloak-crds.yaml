@@ -8,7 +8,6 @@ spec:
   source:
     repoURL: git@github.com:franciscoxaviersp/argocd-apps.git
     path: infrastructure/homelab/manifests/keycloak-crds
-    targetRevision: add/keycloak
   destination:
     namespace: keycloak
     server: https://kubernetes.default.svc
