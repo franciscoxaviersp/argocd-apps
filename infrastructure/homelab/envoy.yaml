@@ -10,6 +10,7 @@ spec:
     repoURL: docker.io/envoyproxy
     targetRevision: v1.5.2
     helm:
+      skipCrds: true
       values: |
         crds:
           gatewayAPI:
