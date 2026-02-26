@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: victoriametrics-operator
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://victoriametrics.github.io/helm-charts/
+    targetRevision: 0.59.0
+    chart: victoria-metrics-operator
+    helm:
+      values: |
+        crds:
+          # -- manages CRD creation. Disables CRD creation only in combination with `crds.plain: false` due to helm dependency conditions limitation
+          enabled: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: infra
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
